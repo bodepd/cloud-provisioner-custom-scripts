@@ -1,0 +1,36 @@
+#!/bin/bash
+# This script is intended to be used with the install action
+# of puppet-cloudpack
+set -u
+set -e
+apt-get -y install ruby rubygems
+gem install facter <% if options[:facter_version] %>-v<%= options[:facter_version] %><% end %> --no-ri --no-rdoc
+apt-get -y install git
+mkdir -p /usr/local/dev
+cd /usr/local/dev
+git clone git://github.com/puppetlabs/puppet.git
+cd puppet
+<% if options[:puppet_version] %>
+git checkout option[:puppet_version]
+<% end %>
+./install.rb
+mkdir -p /etc/puppet /var/lib /var/log /var/run
+cat >/etc/puppet/puppet.conf <<EOF
+[main]
+  logdir = /var/log/puppet
+  rundir = /var/run/puppet
+  ssldir = \$vardir/ssl
+  vardir = /var/lib/puppet
+
+  pluginsync = true
+
+  server = <%= options[:server] %>
+
+  environment = <%= options[:environment] %>
+  certname = <%= options[:certname] %>
+  report = true
+EOF
+
+export PATH="$PATH:/var/lib/gems/1.8/bin"
+cd <%= options[:tmp_dir] %>
+puppet agent --test >& puppet_agent.log
