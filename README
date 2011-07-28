@@ -1,1 +1,7 @@
 These are some scripts that I used to test the puppet cloud provisioner.
+
+Place the erb file in $confdir/scripts (probably ~/.puppet/scripts/
+
+Read the source for the test script and modify it to work.
+
+I will add more notes when I have time :(
